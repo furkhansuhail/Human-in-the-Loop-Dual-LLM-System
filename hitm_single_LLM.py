@@ -48,7 +48,7 @@ def locating_environment_file() -> Optional[Path]:
         for name in file_names:
             candidate = current / name
             if candidate.exists():
-                print(f"✅ Found environment file: {candidate}")
+                print(f"  Found environment file: {candidate}")
                 return candidate
         current = current.parent
 
@@ -77,7 +77,7 @@ def load_api_keys(env_path: Optional[Path] = None, required: Optional[List[str]]
 
     # Load into os.environ
     load_dotenv(env_path, override=True)
-    print(f"📦 Loaded environment from: {env_path}")
+    print(f"  Loaded environment from: {env_path}")
 
     # If no required list provided, read all keys from env file
     if required is None:
@@ -95,10 +95,10 @@ def load_api_keys(env_path: Optional[Path] = None, required: Optional[List[str]]
         if value:
             # Mask the key for security
             masked_value = value[:10] + "..." if len(value) > 10 else "***"
-            print(f"   ✅ {key}: {masked_value}")
+            print(f"    {key}: {masked_value}") 
             keys_status[key] = value
         else:
-            print(f"   ❌ {key}: MISSING")
+            print(f"     {key}: MISSING")
             keys_status[key] = None
 
     return keys_status
@@ -126,12 +126,12 @@ def validate_anthropic_api_key() -> bool:
 
     # Validate format (Anthropic keys typically start with 'sk-ant-')
     if not api_key.startswith('sk-ant-'):
-        print(f"\n⚠️  Warning: API key format unexpected")
+        print(f"\n   Warning: API key format unexpected")
         print(f"   Expected to start with 'sk-ant-'")
         print(f"   Found: {api_key[:10]}...")
         # Don't fail - might be a valid key with different format
 
-    print(f"\n✅ ANTHROPIC_API_KEY validated: {api_key[:15]}...")
+    print(f"\n  ANTHROPIC_API_KEY validated: {api_key[:15]}...")
     return True
 
 def validate_openai_api_key() -> bool:
@@ -144,14 +144,14 @@ def validate_openai_api_key() -> bool:
     api_key = os.environ.get("OPENAI_API_KEY")
 
     if not api_key:
-        print("\n❌ OPENAI_API_KEY not found!")
-        print("\nPlease set it using one of these methods:")
+        print("\n  OPENAI_API_KEY not found!")
+        print("\n Please set it using one of these methods:")
         print("1. Create a .env or keys.env file with:")
         print("   OPENAI_API_KEY=sk-xxxxxx")
-        print("\n2. Set environment variable:")
+        print("\n 2. Set environment variable:")
         print("   export OPENAI_API_KEY=your-key   # Linux/Mac")
         print("   set OPENAI_API_KEY=your-key      # Windows")
-        print("\n3. Get your API key from: https://platform.openai.com/api-keys")
+        print("\n 3. Get your API key from: https://platform.openai.com/api-keys")
         return False
 
     # Common valid OpenAI key prefixes
@@ -164,12 +164,12 @@ def validate_openai_api_key() -> bool:
     )
 
     if not api_key.startswith(valid_prefixes):
-        print("\n⚠️  Warning: API key format unexpected")
+        print("\n   Warning: API key format unexpected")
         print(f"   Expected to start with one of: {valid_prefixes}")
         print(f"   Found: {api_key[:10]}...")
         # Do NOT fail — format may change
 
-    print(f"\n✅ OPENAI_API_KEY validated: {api_key[:15]}...")
+    print(f"\n  OPENAI_API_KEY validated: {api_key[:15]}...")
     return True
 
 # ============================================================================
@@ -278,7 +278,7 @@ class HITMConfig:
         # Handle API key if provided
         if api_key:
             os.environ["ANTHROPIC_API_KEY"] = api_key
-            print("✅ API key set from config parameter")
+            print("  API key set from config parameter")
 
         self.model_name = model_name
         self.temperature = temperature
@@ -337,7 +337,7 @@ class AIResponseGenerator:
                 temperature=config.temperature,
                 max_tokens=config.max_tokens
             )
-            print(f"   ✅ Initialized LLM: {config.model_name}")
+            print(f"     Initialized LLM: {config.model_name}")
         except Exception as e:
             raise RuntimeError(f"Failed to initialize ChatAnthropic: {e}") from e
 
@@ -401,7 +401,7 @@ class QualityChecker:
                 temperature=config.judge_temperature,
                 max_tokens=config.judge_max_tokens
             )
-            print(f"   ✅ Initialized Judge LLM: {config.model_name}")
+            print(f"     Initialized Judge LLM: {config.model_name}")
         except Exception as e:
             raise RuntimeError(f"Failed to initialize Judge ChatAnthropic: {e}") from e
 
@@ -497,7 +497,7 @@ Respond in JSON format:
             reasoning = result.get("reasoning", "")
 
         except Exception as e:
-            print(f"   ⚠️  Judge evaluation error: {e}")
+            print(f"      Judge evaluation error: {e}")
             reasoning = "Could not complete automated review"
 
         return reasoning
@@ -550,11 +550,11 @@ class ConsoleReviewInterface(ReviewInterface):
 
         if decision == "edit":
             edited_content = self._get_edited_content(response.content)
-            feedback = input("\n💬 Feedback (optional): ").strip()
+            feedback = input("\n  Feedback (optional): ").strip()
         elif decision == "reject":
-            feedback = input("\n💬 Reason for rejection: ").strip()
+            feedback = input("\n  Reason for rejection: ").strip()
         elif decision == "approve":
-            feedback = input("\n💬 Feedback (optional): ").strip()
+            feedback = input("\n  Feedback (optional): ").strip()
 
         return HumanReview(
             request_id=request.id,
@@ -574,16 +574,16 @@ class ConsoleReviewInterface(ReviewInterface):
         print("HUMAN REVIEW REQUIRED")
         print("=" * 80)
 
-        print(f"\n📝 Request ID: {request.id}")
-        print(f"⏰ Time: {request.timestamp}")
+        print(f"\n  Request ID: {request.id}")
+        print(f"  Time: {request.timestamp}")
 
-        print(f"\n❓ USER QUERY:")
+        print(f"\n  USER QUERY:")
         print(f"   {request.user_query}")
 
-        print(f"\n🤖 AI RESPONSE:")
+        print(f"\n  AI RESPONSE:")
         print(f"   {response.content}")
 
-        print(f"\n⚠️  QUALITY CHECK:")
+        print(f"\n   QUALITY CHECK:")
         print(f"   Status: {'✓ PASS' if quality_check.passed else '✗ FLAGGED'}")
         if quality_check.flags:
             print(f"   Flags: {', '.join(quality_check.flags)}")
@@ -609,11 +609,11 @@ class ConsoleReviewInterface(ReviewInterface):
             elif choice == "3":
                 return "reject"
             else:
-                print("❌ Invalid choice. Please enter 1, 2, or 3.")
+                print("  Invalid choice. Please enter 1, 2, or 3.")
 
     def _get_edited_content(self, original: str) -> str:
         """Get edited content from human."""
-        print("\n✏️  EDIT MODE")
+        print("\n   EDIT MODE")
         print("Enter your edited version (press Enter twice when done):\n")
 
         lines = []
@@ -672,7 +672,7 @@ class FeedbackLogger:
         with open(self.log_file, 'a') as f:
             f.write(json.dumps(entry) + '\n')
 
-        print(f"\n📊 Logged to {self.log_file}")
+        print(f"\n  Logged to {self.log_file}")
 
     def get_stats(self) -> Dict:
         """
@@ -747,7 +747,7 @@ class HITMSystem:
             ValueError: If API key validation fails
             RuntimeError: If component initialization fails
         """
-        print("\n🔧 Initializing HITM System...")
+        print("\n  Initializing HITM System...")
 
         # Validate API key if requested
         if validate_api:
@@ -758,13 +758,13 @@ class HITMSystem:
 
         # Initialize components with error handling
         try:
-            print("\n📦 Initializing components...")
+            print("\n  Initializing components...")
             self.generator = AIResponseGenerator(self.config)
             self.checker = QualityChecker(self.config)
             self.review_interface = review_interface or ConsoleReviewInterface()
             self.logger = FeedbackLogger(self.config.log_file)
-            print("   ✅ Review interface ready")
-            print("   ✅ Feedback logger ready")
+            print("     Review interface ready")
+            print("     Feedback logger ready")
         except Exception as e:
             raise RuntimeError(
                 f"Failed to initialize HITM system: {e}\n"
@@ -774,7 +774,7 @@ class HITMSystem:
         # Request tracking
         self.request_counter = 0
 
-        print("\n✅ HITM System initialization complete!")
+        print("\n  HITM System initialization complete!")
 
     def process(
             self,
@@ -802,7 +802,7 @@ class HITMSystem:
             metadata=request_metadata or {}
         )
 
-        print(f"\n🔄 Processing request {request.id}...")
+        print(f"\n  Processing request {request.id}...")
 
         # Step 2: Generate AI response
         print("   → Generating AI response...")
@@ -855,13 +855,13 @@ class HITMSystem:
         # Apply decision
         if human_review.decision == "approve":
             final_response = response.content
-            print("\n✅ Response APPROVED")
+            print("\n  Response APPROVED")
         elif human_review.decision == "edit":
             final_response = human_review.edited_content
-            print("\n✏️  Response EDITED")
+            print("\n   Response EDITED")
         else:  # reject
             final_response = "[Response rejected - regeneration needed]"
-            print("\n❌ Response REJECTED")
+            print("\n  Response REJECTED")
 
         # Log feedback
         self.logger.log(request, response, quality_check, human_review)
@@ -944,10 +944,10 @@ def run_interactive_demo(hitm_system: HITMSystem) -> None:
     print("Type 'stats' to see statistics, or 'quit' to exit.\n")
 
     while True:
-        user_input = input("\n👤 User Query (or 'quit'/'stats'): ").strip()
+        user_input = input("\n  User Query (or 'quit'/'stats'): ").strip()
 
         if user_input.lower() == 'quit':
-            print("\n👋 Goodbye!")
+            print("\n  Goodbye!")
             break
 
         if user_input.lower() == 'stats':
@@ -956,7 +956,7 @@ def run_interactive_demo(hitm_system: HITMSystem) -> None:
             continue
 
         if not user_input:
-            print("❌ Please enter a query.")
+            print("  Please enter a query.")
             continue
 
         try:
@@ -967,10 +967,10 @@ def run_interactive_demo(hitm_system: HITMSystem) -> None:
             # hitm_system.process(user_input)
 
         except KeyboardInterrupt:
-            print("\n\n⚠️  Process interrupted. Returning to menu...")
+            print("\n\n   Process interrupted. Returning to menu...")
             continue
         except Exception as e:
-            print(f"\n❌ Error: {e}")
+            print(f"\n  Error: {e}")
             import traceback
             traceback.print_exc()
             continue
@@ -987,20 +987,20 @@ def main():
     print("=" * 80)
 
     # Step 1: Locate and load environment file
-    print("\n📍 Step 1: Locating environment file...")
+    print("\n  Step 1: Locating environment file...")
     env_path = locating_environment_file()
 
     if env_path is None:
-        print("\n❌ No environment file found!")
-        print("\nPlease create a .env or keys.env file with:")
+        print("\n No environment file found!")
+        print("\n Please create a .env or keys.env file with:")
         print("ANTHROPIC_API_KEY=sk-ant-api03-your-key-here")
-        print("\nAlternatively, set the environment variable manually:")
+        print("\n Alternatively, set the environment variable manually:")
         print("export ANTHROPIC_API_KEY=your-key  # Linux/Mac")
         print("set ANTHROPIC_API_KEY=your-key     # Windows")
         sys.exit(1)
 
     # Step 2: Load API keys
-    print("\n📦 Step 2: Loading API keys...")
+    print("\n  Step 2: Loading API keys...")
     keys = load_api_keys(env_path)
 
     # Check for required keys
@@ -1008,16 +1008,16 @@ def main():
     openai_key = keys.get("OPENAI_API_KEY")
 
     if not anthropic_key:
-        print("\n❌ ANTHROPIC_API_KEY is required but not found!")
+        print("\n  ANTHROPIC_API_KEY is required but not found!")
         print("Please add it to your environment file.")
         sys.exit(1)
 
     # Optional: warn about OpenAI key if present but not used
     if openai_key:
-        print("\nℹ️  Note: OPENAI_API_KEY found but not used by this system")
+        print("\n   Note: OPENAI_API_KEY found but not used by this system")
 
     # Step 3: Validate Anthropic API key
-    print("\n🔐 Step 3: Validating API key...")
+    print("\n  Step 3: Validating API key...")
     if not validate_anthropic_api_key():
         sys.exit(1)
 
@@ -1025,27 +1025,27 @@ def main():
         sys.exit(1)
 
     # Step 4: Create configuration
-    print("\n⚙️  Step 4: Creating configuration...")
+    print("\n   Step 4: Creating configuration...")
     config = HITMConfig(
         model_name="claude-sonnet-4-20250514",
         temperature=0.7,
         max_tokens=1024,
         log_file="hitm_feedback.jsonl"
     )
-    print("   ✅ Configuration created")
+    print("     Configuration created")
 
     # Step 5: Initialize HITM system
-    print("\n🚀 Step 5: Initializing HITM system...")
+    print("\n  Step 5: Initializing HITM system...")
     try:
         hitm_system = HITMSystem(config=config, validate_api=True)
     except Exception as e:
-        print(f"\n❌ Failed to initialize HITM system: {e}")
+        print(f"\n  Failed to initialize HITM system: {e}")
         import traceback
         traceback.print_exc()
         sys.exit(1)
 
     print("\n" + "=" * 80)
-    print("🎉 SYSTEM READY!")
+    print("  SYSTEM READY!")
     print("=" * 80)
 
     # Step 6: Run interactive demo
